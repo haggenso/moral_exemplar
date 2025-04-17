@@ -1,0 +1,66 @@
+<!DOCTYPE HTML>
+<HEAD>
+<TITLE>Edit a Scenario</TITLE>
+<STYLE>
+input[type=number] {
+    width: 7ch; /* 7 characters width */
+}
+</STYLE>
+<SCRIPT>
+function init() {
+	// Stop 
+	let val = document.getElementById("mainForm");
+	// alert(val);
+	val.onkeypress = function (key) {
+		let btn = 0 || key.keyCode || key.charCode;
+		if (btn == 13) {
+			// alert("Enter Key is Pressed!");
+			key.preventDefault();
+		}
+	} 
+}
+</SCRIPT>
+</HEAD>
+<BODY onload=init()>
+<H2>Edit Scenario with Actions</H2>
+{{ form_data['msg_bar'] }}<BR><BR>
+<FORM ID="mainForm" METHOD="POST">
+<INPUT TYPE="hidden" NAME="scenario_id" VALUE="{{ form_data['scenario_id'] }}"/>
+<LABEL FOR="scenario_key">scenario_key: </LABEL>
+<INPUT TYPE="text" NAME="scenario_key" READONLY SIZE=30 VALUE="{{ form_data['scenario_key'] }}"/><BR>
+<LABEL FOR="source_id">Scenario source: </LABEL>
+<SELECT NAME="source_id">
+{% for html in source_choices %}
+    {{ html | safe }}
+{% endfor %}	
+</SELECT><BR>
+<LABEL FOR="start_chapter">Start Chapter: </LABEL>
+<INPUT TYPE="number" NAME="start_chapter" VALUE="{{ form_data['start_chapter'] }}"/>&nbsp;&nbsp;
+<LABEL FOR="start_verse">Start Verse: </LABEL>
+<INPUT TYPE="number" NAME="start_verse" VALUE="{{ form_data['start_verse'] }}"/><BR>
+<LABEL FOR="end_chapter">End Chapter: </LABEL>
+<INPUT TYPE="number" NAME="end_chapter" VALUE="{{ form_data['end_chapter'] }}"/>&nbsp;&nbsp;
+<LABEL FOR="end_verse">End Verse: </LABEL>
+<INPUT TYPE="number" NAME="end_verse" VALUE="{{ form_data['end_verse'] }}"/><BR>
+Description:<BR>
+<TEXTAREA NAME="description" ROWS="4" COLS="100" STYLE="overflow:auto">
+{{ form_data['description'] }}</TEXTAREA><BR>
+Context:<BR>
+<TEXTAREA NAME="context" ROWS="4" COLS="100" STYLE="overflow:auto">
+{{ form_data['context'] }}</TEXTAREA><BR>
+Ethical Question:<BR>
+<TEXTAREA NAME="ethic_q" ROWS="4" COLS="100" STYLE="overflow:auto">
+{{ form_data['ethic_q'] }}</TEXTAREA><BR>
+<TABLE BORDER=1>
+	<TR><TD STYLE="text-align:center">Moral</TD>
+	<TD STYLE="text-align:center">Immoral</TD>
+	<TD STYLE="text-align:center">Amoral</TD></TR>
+	<TR><TD>{{ form_data['moral_actions'] | safe }}</TD>
+	<TD>{{ form_data['immoral_actions'] | safe }}</TD>
+	<TD>{{ form_data['amoral_actions'] | safe }}</TD></TR>	
+</TABLE>
+<BR>
+<INPUT TYPE="submit" value="Save">
+</FORM><BR>
+<A HREF="view">Back to List of Scenarios</A>
+</BODY>
