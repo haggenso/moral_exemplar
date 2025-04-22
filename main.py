@@ -71,7 +71,7 @@ def get_action_list(cursor, scenario_id, moral_status):
 	action_html ='\n'
 
 	query = "SELECT action_id, action_description, confidence FROM actions "
-	query += " WHERE scenario_id = %s and moral_status = %s"
+	query += " WHERE deleted=0 and scenario_id = %s and moral_status = %s"
 	cursor.execute(query, (scenario_id, moral_status))
 	# Fetch rows
 	q_res = cursor.fetchall()
@@ -109,7 +109,6 @@ def save_action(form_data):
 	global cursor
 
 	action_insert=[]
-	action_update=[]
 	action_delete=[]
 	for ele_key in form_data.keys():
 		matches = re.match(r"lst_(\D+)(\d+)_desc", ele_key)
@@ -124,7 +123,8 @@ def save_action(form_data):
 			if len(action_desc) > 0 :
 				# action_id exists -> Update
 				if len(form_data[action_id_name].strip()) > 0 :
-					action_update.append((action_desc, matches.group(1), form_data[action_confidence_name], form_data[action_id_name]))
+					action_insert.append((action_desc, matches.group(1), form_data[action_confidence_name]))
+					action_delete.append(form_data[action_id_name])
 				# action_id missing -> New Record -> Insert
 				else:
 					action_insert.append((action_desc, matches.group(1), form_data[action_confidence_name]))
@@ -132,20 +132,14 @@ def save_action(form_data):
 			elif len(form_data[action_id_name].strip()) > 0 :
 				action_delete.append(form_data[action_id_name])
 
+	for item in action_delete:
+		query = "UPDATE actions SET deleted=1 WHERE action_id = %s"
+		cursor.execute(query, (item,))
 	for item in action_insert:
 		query = "INSERT INTO actions (timestamp, scenario_id, "
 		query += " action_description, moral_status, confidence) "
-		query += " VALUES (curdate(), %s, %s, %s, %s)"
+		query += " VALUES (NOW(), %s, %s, %s, %s)"
 		cursor.execute(query, (form_data['scenario_id'], item[0], item[1], item[2]))
-	for item in action_update:
-		query = "UPDATE actions SET timestamp = curdate(), "
-		query += " scenario_id = %s, action_description = %s, "
-		query += " moral_status = %s, confidence = %s "
-		query += " WHERE action_id = %s"
-		cursor.execute(query, (form_data['scenario_id'], item[0], item[1], item[2], item[3]))
-	for item in action_delete:
-		query = "DELETE FROM actions WHERE action_id = %s"
-		cursor.execute(query, (item,))
 
 @app.route("/")
 def index():
@@ -252,7 +246,7 @@ def edit():
 				query = "INSERT INTO scenarios (date_recorded, scenario_key, source_id, "
 				query += " start_chapter, start_verse, end_chapter, end_verse, "
 				query += " description, context, ethic_q) "
-				query += " VALUES (curdate(), %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+				query += " VALUES (NOW(), %s, %s, %s, %s, %s, %s, %s, %s, %s)"
 				cursor.execute(query, (form_data['scenario_key'], form_data['source_id'], \
 				form_data['start_chapter'], form_data['start_verse'], form_data['end_chapter'], form_data['end_verse'], \
 				form_data['description'], form_data['context'], form_data['ethic_q']))
@@ -284,7 +278,7 @@ def edit():
 				form_data['scenario_key'] = scenario_key
 				# scenario_key = form_data['scenario_key']
 
-				query = "UPDATE scenarios set date_recorded = curdate(), "
+				query = "UPDATE scenarios set date_recorded = NOW(), "
 				query += " scenario_key = %s, source_id = %s, "
 				query += " start_chapter = %s, start_verse = %s, "
 				query += " end_chapter = %s, end_verse = %s, "
