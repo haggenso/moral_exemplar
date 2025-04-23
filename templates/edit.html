@@ -8,7 +8,7 @@ input[type=number] {
 </STYLE>
 <SCRIPT>
 function init() {
-	// Stop 
+	// Stop
 	let val = document.getElementById("mainForm");
 	// alert(val);
 	val.onkeypress = function (key) {
@@ -17,13 +17,16 @@ function init() {
 			// alert("Enter Key is Pressed!");
 			key.preventDefault();
 		}
-	} 
+	}
 }
 </SCRIPT>
 </HEAD>
 <BODY onload=init()>
 <H2>Edit Scenario with Actions</H2>
-{{ form_data['msg_bar'] }}<BR><BR>
+<TABLE width=100%>
+<TR><TD>{{ form_data['msg_bar'] }}</TD>
+<TD ALIGN=RIGHT>Login as {{ form_data['username'] }}</TD></TR>
+</TABLE><BR>
 <FORM ID="mainForm" METHOD="POST">
 <INPUT TYPE="hidden" NAME="scenario_id" VALUE="{{ form_data['scenario_id'] }}"/>
 <LABEL FOR="scenario_key">scenario_key: </LABEL>
@@ -32,7 +35,7 @@ function init() {
 <SELECT NAME="source_id">
 {% for html in source_choices %}
     {{ html | safe }}
-{% endfor %}	
+{% endfor %}
 </SELECT><BR>
 <LABEL FOR="start_chapter">Start Chapter: </LABEL>
 <INPUT TYPE="number" NAME="start_chapter" VALUE="{{ form_data['start_chapter'] }}"/>&nbsp;&nbsp;
@@ -57,7 +60,7 @@ Ethical Question:<BR>
 	<TD STYLE="text-align:center">Amoral</TD></TR>
 	<TR><TD>{{ form_data['moral_actions'] | safe }}</TD>
 	<TD>{{ form_data['immoral_actions'] | safe }}</TD>
-	<TD>{{ form_data['amoral_actions'] | safe }}</TD></TR>	
+	<TD>{{ form_data['amoral_actions'] | safe }}</TD></TR>
 </TABLE>
 <BR>
 <INPUT TYPE="submit" value="Save">

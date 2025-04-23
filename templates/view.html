@@ -4,8 +4,10 @@
 </HEAD>
 <BODY>
 <H2>Moral Exemplar Dataset</H2>
-Login as {{ username }}. <A HREF='logout'>Logout</A><BR>
-<A HREF="edit?id=new">Add a New Record</A>
+<TABLE width=100%>
+<TR><TD><A HREF="edit?id=new">Add a New Record</A></TD>
+<TD ALIGN=RIGHT>Login as {{ username }}. <A HREF='logout'>Logout</A></TD></TR>
+</TABLE>
 <TABLE border=1>
 {% for html in list_of_html %}
     <TR>{{ html | safe }}</TR>

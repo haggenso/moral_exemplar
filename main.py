@@ -82,19 +82,15 @@ def get_action_list(cursor, scenario_id, moral_status):
 			item = list_remove_none(q_res[i])
 			item = list_html_esc(item)
 			# dict(zip(['action_id', 'action_description','action_confidence'] item))
-			action_id = item[0]
 			action_description = item[1]
 			action_confidence = item[2]
 		else:
-			action_id = ""
 			action_description = ""
 			action_confidence = "1.00"
 
 		action_num = '{:02d}'.format(i+1)
 
 		action_html += 'Action' + action_num + ':<BR>\n'
-		action_html += '<INPUT TYPE="hidden" NAME="lst_' + moral_status + action_num + '_id"'
-		action_html += ' VALUE="' + action_id + '"/>\n'
 		action_html += '<TEXTAREA NAME="lst_' + moral_status + action_num + '_desc" ROWS="4"'
 		action_html += ' COLS="30" STYLE="overflow:auto">\n'
 		action_html += action_description + '</TEXTAREA><BR>\n'
@@ -108,38 +104,21 @@ def get_action_list(cursor, scenario_id, moral_status):
 def save_action(form_data):
 	global cursor
 
-	action_insert=[]
-	action_delete=[]
 	for ele_key in form_data.keys():
 		matches = re.match(r"lst_(\D+)(\d+)_desc", ele_key)
 		# Match lst_(moral_status)(count)_desc
 		if matches :
 			action_desc = form_data[ele_key].strip()
-			action_id_name = 'lst_' + matches.group(1) + matches.group(2) + '_id'
 			action_confidence_name = 'lst_' + matches.group(1) + matches.group(2) + '_confidence'
+			# action_id_name = 'lst_' + matches.group(1) + matches.group(2) + '_id'
 			# print(action_id_name)
 
 			# Some Content in Description
 			if len(action_desc) > 0 :
-				# action_id exists -> Update
-				if len(form_data[action_id_name].strip()) > 0 :
-					action_insert.append((action_desc, matches.group(1), form_data[action_confidence_name]))
-					action_delete.append(form_data[action_id_name])
-				# action_id missing -> New Record -> Insert
-				else:
-					action_insert.append((action_desc, matches.group(1), form_data[action_confidence_name]))
-			# Empty Description with an action_id -> Delete
-			elif len(form_data[action_id_name].strip()) > 0 :
-				action_delete.append(form_data[action_id_name])
-
-	for item in action_delete:
-		query = "UPDATE actions SET deleted=1 WHERE action_id = %s"
-		cursor.execute(query, (item,))
-	for item in action_insert:
-		query = "INSERT INTO actions (timestamp, scenario_id, "
-		query += " action_description, moral_status, confidence) "
-		query += " VALUES (NOW(), %s, %s, %s, %s)"
-		cursor.execute(query, (form_data['scenario_id'], item[0], item[1], item[2]))
+				query = "INSERT INTO actions (timestamp, scenario_id, "
+				query += " action_description, moral_status, confidence) "
+				query += " VALUES (NOW(), %s, %s, %s, %s)"
+				cursor.execute(query, (form_data['scenario_id'], action_desc, matches.group(1), form_data[action_confidence_name]))
 
 @app.route("/")
 def index():
@@ -192,8 +171,8 @@ def view():
 		id_key = 'scenario_id'
 		fld_list = ['scenario_key','description','context']
 		query = "SELECT " + id_key + "," + ",".join(fld_list) + " FROM scenarios "
-		query += " WHERE " + session['groupfilter']
-		query += " ORDER BY " + id_key
+		query += " WHERE deleted=0 and " + session['groupfilter']
+		query += " ORDER BY source_id, start_chapter, start_verse"
 		cursor.execute(query)
 
 		# Fetch all rows
@@ -233,81 +212,51 @@ def edit():
 
 		if request.method == 'POST' :
 			form_data = dict(request.form)
-			if scenario_id == "new" :
+			cursor = mysql.connection.cursor()
 
-				cursor = mysql.connection.cursor()
+			if scenario_id.isdigit() :
+				query = "UPDATE scenarios SET deleted=1 WHERE scenario_id = %s"
+				cursor.execute(query, (scenario_id,))
+				query = "UPDATE actions SET deleted=1 WHERE scenario_id = %s"
+				cursor.execute(query, (scenario_id,))
 
-				source_key = get_source_key(cursor, form_data['source_id'])
-				scenario_key = source_key + 'C' + str(form_data['start_chapter']) + 'V' + str(form_data['start_verse'])
-				if not((form_data['start_chapter']==form_data['end_chapter']) and (form_data['start_verse']==form_data['end_verse'])) :
-					scenario_key += '-C' + str(form_data['end_chapter']) + 'V' + str(form_data['end_verse'])
-				form_data['scenario_key'] = scenario_key
+			source_key = get_source_key(cursor, form_data['source_id'])
+			scenario_key = source_key + 'C' + str(form_data['start_chapter']) + 'V' + str(form_data['start_verse'])
+			if not((form_data['start_chapter']==form_data['end_chapter']) and (form_data['start_verse']==form_data['end_verse'])) :
+				scenario_key += '-C' + str(form_data['end_chapter']) + 'V' + str(form_data['end_verse'])
+			form_data['scenario_key'] = scenario_key
 
-				query = "INSERT INTO scenarios (date_recorded, scenario_key, source_id, "
-				query += " start_chapter, start_verse, end_chapter, end_verse, "
-				query += " description, context, ethic_q) "
-				query += " VALUES (NOW(), %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-				cursor.execute(query, (form_data['scenario_key'], form_data['source_id'], \
-				form_data['start_chapter'], form_data['start_verse'], form_data['end_chapter'], form_data['end_verse'], \
-				form_data['description'], form_data['context'], form_data['ethic_q']))
+			query = "INSERT INTO scenarios (date_recorded, scenario_key, source_id, "
+			query += " start_chapter, start_verse, end_chapter, end_verse, "
+			query += " description, context, ethic_q, username) "
+			query += " VALUES (NOW(), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+			cursor.execute(query, (form_data['scenario_key'], form_data['source_id'], \
+			form_data['start_chapter'], form_data['start_verse'], form_data['end_chapter'], form_data['end_verse'], \
+			form_data['description'], form_data['context'], form_data['ethic_q'], session['username']))
 
-				cursor.execute("SELECT LAST_INSERT_ID()")
-				record = cursor.fetchone()
-				form_data['scenario_id'] = record[0]
+			cursor.execute("SELECT LAST_INSERT_ID()")
+			record = cursor.fetchone()
+			form_data['scenario_id'] = record[0]
 
-				save_action(form_data)
+			save_action(form_data)
 
-				mysql.connection.commit()
+			mysql.connection.commit()
 
+			if scenario_id.isdigit() :
+				return redirect(url_for('edit') + "?id=" + str(form_data['scenario_id'])+"&from_edit=")
+			else:
 				return redirect(url_for('edit') + "?id=" + str(form_data['scenario_id'])+"&from_new=")
 
-				#source_choices = get_choices(cursor, "sources", "source_id", "title", -1)
+			# source_choices = get_choices(cursor, "sources", "source_id", "title", -1)
 
-				# form_data['msg_bar'] = "New Record Added!"
-				# return render_template('edit.html', form_data=form_data, source_choices=source_choices)
+			# return render_template('edit.html', form_data=form_data, source_choices=source_choices)
 
-				# return "Save to be impelemented! form_data:" + repr(form_data)
-			elif scenario_id.isdigit() :
-
-				cursor = mysql.connection.cursor()
-
-				source_key = get_source_key(cursor, form_data['source_id'])
-				scenario_key = source_key + 'C' + str(form_data['start_chapter']) + 'V' + str(form_data['start_verse'])
-				if not((form_data['start_chapter']==form_data['end_chapter']) and (form_data['start_verse']==form_data['end_verse'])) :
-					scenario_key += '-C' + str(form_data['end_chapter']) + 'V' + str(form_data['end_verse'])
-				form_data['scenario_key'] = scenario_key
-				# scenario_key = form_data['scenario_key']
-
-				query = "UPDATE scenarios set date_recorded = NOW(), "
-				query += " scenario_key = %s, source_id = %s, "
-				query += " start_chapter = %s, start_verse = %s, "
-				query += " end_chapter = %s, end_verse = %s, "
-				query += " description = %s, context = %s, ethic_q = %s "
-				query += " where scenario_id = %s "
-				# print (query % (form_data['scenario_key'], form_data['source_id'], \
-				# form_data['start_chapter'], form_data['start_verse'], form_data['end_chapter'], form_data['end_verse'], \
-				# form_data['description'], form_data['context'], form_data['ethic_q'], form_data['scenario_id']))
-
-				cursor.execute(query, (form_data['scenario_key'], form_data['source_id'], \
-				form_data['start_chapter'], form_data['start_verse'], form_data['end_chapter'], form_data['end_verse'], \
-				form_data['description'], form_data['context'], form_data['ethic_q'], form_data['scenario_id']))
-
-				save_action(form_data)
-
-				mysql.connection.commit()
-
-				return redirect(url_for('edit') + "?id=" + str(form_data['scenario_id'])+"&from_edit=")
-
-				# source_choices = get_choices(cursor, "sources", "source_id", "title", -1)
-
-				# form_data['msg_bar'] = "Edited Record Saved!"
-				# return render_template('edit.html', form_data=form_data, source_choices=source_choices)
-
-				#return "Update to be impelemented! scenario_id: " + form_data['scenario_id'] + " form_data:" +  repr(form_data)
+			# return "Update to be impelemented! scenario_id: " + form_data['scenario_id'] + " form_data:" +  repr(form_data)
 
 		elif scenario_id == "new" :
 			form_data = {}
 			form_data['scenario_id'] = scenario_id
+			form_data['username'] = session['username']
 
 			cursor = mysql.connection.cursor()
 			source_choices = get_choices(cursor, "sources", "source_id", "title", -1)
@@ -325,30 +274,35 @@ def edit():
 			# out_str += app.config['MYSQL_DB']
 			cursor = mysql.connection.cursor()
 
-			query = "SELECT " + ",".join(form_fld) + " FROM scenarios WHERE scenario_id = %s"
+			query = "SELECT " + ",".join(form_fld) + " FROM scenarios "
+			query += " WHERE " + session['groupfilter'] + " and scenario_id = %s"
 			# Test possibility of stack queries SQL injection
 			# query = "select 1;select 2; select 3"
 			cursor.execute(query, (scenario_id,))
 
 			# Fetch one row
 			q_res = cursor.fetchone()
-			q_res = list_remove_none(q_res)
-			form_data = dict(zip(form_fld, q_res))
-
-			source_choices = get_choices(cursor, "sources", "source_id", "title", form_data['source_id'])
-
-			form_data['moral_actions'] = get_action_list(cursor, scenario_id, 'moral')
-			form_data['immoral_actions'] = get_action_list(cursor, scenario_id, 'immoral')
-			form_data['amoral_actions'] = get_action_list(cursor, scenario_id, 'amoral')
-
-			if 'from_new' in request.args:
-				form_data['msg_bar'] = "New Record Added!"
-			elif 'from_edit' in request.args:
-				form_data['msg_bar'] = "Edited Record Saved!"
+			if q_res is None:
+				return redirect(url_for('view'))
 			else:
-				form_data['msg_bar'] = "Editing a Previous Record"
+				q_res = list_remove_none(q_res)
+				form_data = dict(zip(form_fld, q_res))
+				form_data['username'] = session['username']
 
-			return render_template('edit.html', form_data=form_data, source_choices=source_choices)
+				source_choices = get_choices(cursor, "sources", "source_id", "title", form_data['source_id'])
+
+				form_data['moral_actions'] = get_action_list(cursor, scenario_id, 'moral')
+				form_data['immoral_actions'] = get_action_list(cursor, scenario_id, 'immoral')
+				form_data['amoral_actions'] = get_action_list(cursor, scenario_id, 'amoral')
+
+				if 'from_new' in request.args:
+					form_data['msg_bar'] = "New Record Added!"
+				elif 'from_edit' in request.args:
+					form_data['msg_bar'] = "Edited Record Saved!"
+				else:
+					form_data['msg_bar'] = "Editing a Previous Record"
+
+				return render_template('edit.html', form_data=form_data, source_choices=source_choices)
 
 			# return "Edit function to be implemented! id: " + repr(form_data)
 			# return "Edit function to be implemented! id: " + repr(request.args['id'])
