@@ -86,12 +86,12 @@ def get_action_list(cursor, scenario_id, moral_status):
 			action_confidence = item[2]
 		else:
 			action_description = ""
-			action_confidence = "1.00"
+			action_confidence = "0.50"
 
 		action_num = '{:02d}'.format(i+1)
 
 		action_html += 'Action' + action_num + ':<BR>\n'
-		action_html += '<TEXTAREA NAME="lst_' + moral_status + action_num + '_desc" ROWS="4"'
+		action_html += '<TEXTAREA NAME="lst_' + moral_status + action_num + '_desc" ROWS="8"'
 		action_html += ' COLS="30" STYLE="overflow:auto">\n'
 		action_html += action_description + '</TEXTAREA><BR>\n'
 		action_html += '<LABEL FOR="lst_' + moral_status + action_num + '_confidence">Confidence Level: </LABEL>\n'
