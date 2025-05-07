@@ -169,7 +169,7 @@ def view():
 		cursor = mysql.connection.cursor()
 
 		id_key = 'scenario_id'
-		fld_list = ['scenario_key','description','context']
+		fld_list = ['scenario_key','description','context','validated']
 		query = "SELECT " + id_key + "," + ",".join(fld_list) + " FROM scenarios "
 		query += " WHERE deleted=0 and " + session['groupfilter']
 		query += " ORDER BY source_id, start_chapter, start_verse"
@@ -186,8 +186,10 @@ def view():
 			header[i] = "<B>" + header[i] +"</B>"
 		list_of_html.append(list_in_TD(header))
 		for item in scenarios:
+			item = list(item)
 			scenario_id = item[0]
 			item = item[1:]
+			item[-1] = 'Validated' if item[-1] else 'Not Validated'
 			item = list_remove_none(item)
 			item = list_html_esc(item)
 			item.insert(0, "<A HREF='" + url_for('edit') + "?id=" + str(scenario_id) + "'>Edit</A>")
@@ -208,7 +210,7 @@ def edit():
 	try:
 		scenario_id = str(request.args['id'])
 		form_fld = ['scenario_id','scenario_key','source_id','start_chapter','start_verse',
-				'end_chapter','end_verse','description','context','ethic_q']
+				'end_chapter','end_verse','description','context','ethic_q','validated']
 
 		if request.method == 'POST' :
 			form_data = dict(request.form)
@@ -226,13 +228,18 @@ def edit():
 				scenario_key += '-C' + str(form_data['end_chapter']) + 'V' + str(form_data['end_verse'])
 			form_data['scenario_key'] = scenario_key
 
+			if form_data.get('validated', '') == '':
+				form_data['validated']=0
+			else:
+				form_data['validated']=1
+
 			query = "INSERT INTO scenarios (date_recorded, scenario_key, source_id, "
 			query += " start_chapter, start_verse, end_chapter, end_verse, "
-			query += " description, context, ethic_q, username) "
-			query += " VALUES (NOW(), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+			query += " description, context, ethic_q, username, validated) "
+			query += " VALUES (NOW(), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
 			cursor.execute(query, (form_data['scenario_key'], form_data['source_id'], \
 			form_data['start_chapter'], form_data['start_verse'], form_data['end_chapter'], form_data['end_verse'], \
-			form_data['description'], form_data['context'], form_data['ethic_q'], session['username']))
+			form_data['description'], form_data['context'], form_data['ethic_q'], session['username'], form_data['validated']))
 
 			cursor.execute("SELECT LAST_INSERT_ID()")
 			record = cursor.fetchone()
