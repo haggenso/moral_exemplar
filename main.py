@@ -7,6 +7,13 @@ from flask_mysqldb import MySQL
 
 action_count = 5
 
+like6lvl = ['Strongly Disagree',
+	'Disagree',
+	'Somewhat Disagree',
+	'Somewhat Agree',
+	'Agree',
+	'Strongly Agree']
+
 app = Flask(__name__)
 # Set the secret key to some random bytes. Keep this really secret!
 app.secret_key = config('session_key')
@@ -86,17 +93,23 @@ def get_action_list(cursor, scenario_id, moral_status):
 			action_confidence = item[2]
 		else:
 			action_description = ""
-			action_confidence = "0.50"
+			action_confidence = "0"
 
 		action_num = '{:02d}'.format(i+1)
 
+		action_html += '<HR>\n'
 		action_html += 'Action' + action_num + ':<BR>\n'
 		action_html += '<TEXTAREA NAME="lst_' + moral_status + action_num + '_desc" ROWS="8"'
 		action_html += ' COLS="30" STYLE="overflow:auto">\n'
 		action_html += action_description + '</TEXTAREA><BR>\n'
-		action_html += '<LABEL FOR="lst_' + moral_status + action_num + '_confidence">Confidence Level: </LABEL>\n'
-		action_html += '<INPUT TYPE="NUMBER" NAME="lst_' + moral_status + action_num + '_confidence"'
-		action_html += ' STEP="0.01" MIN="0" MAX="1" VALUE="' + action_confidence + '"/><BR>\n'
+		for idx in range(len(like6lvl)):
+			confidence_value = round(idx*0.1,1)
+			action_html += '<INPUT TYPE="RADIO" NAME="lst_' + moral_status + action_num + '_confidence"'
+			action_html += ' VALUE=' + str(confidence_value)
+			if abs(float(action_confidence) - confidence_value) < 0.01:
+				action_html += ' CHECKED'
+			action_html += '>'
+			action_html += like6lvl[idx] +'<BR>\n'
 
 	return action_html
 
