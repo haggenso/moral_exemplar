@@ -78,7 +78,7 @@ def get_action_list(cursor, scenario_id, moral_status):
 	action_html ='\n'
 
 	query = "SELECT action_id, action_description, confidence FROM actions "
-	query += " WHERE deleted=0 and scenario_id = %s and moral_status = %s"
+	query += " WHERE scenario_id = %s and moral_status = %s"
 	cursor.execute(query, (scenario_id, moral_status))
 	# Fetch rows
 	q_res = cursor.fetchall()
