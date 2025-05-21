@@ -27,6 +27,8 @@ function init() {
 <TR><TD>{{ form_data['msg_bar'] }}</TD>
 <TD ALIGN=RIGHT>Login as {{ form_data['username'] }}</TD></TR>
 </TABLE><BR>
+<TABLE WIDTH=100%>
+<TR><TD>
 <FORM ID="mainForm" METHOD="POST">
 <INPUT TYPE="hidden" NAME="scenario_id" VALUE="{{ form_data['scenario_id'] }}"/>
 <LABEL FOR="scenario_key">scenario_key: </LABEL>
@@ -66,6 +68,10 @@ Ethical Question:<BR>
 <LABEL FOR="validated">Validation Completed</LABEL>
 <INPUT TYPE="checkbox" NAME="validated" checked/>
 <INPUT TYPE="submit" value="Save">
-</FORM><BR>
+</FORM>
+</TD><TD VALIGN="TOP">
+{{ form_data['version'] | safe}}
+</TD></TR>
+</TABLE>
 <A HREF="view">Back to List of Scenarios</A>
 </BODY>
