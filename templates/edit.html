@@ -1,32 +1,23 @@
-<!DOCTYPE HTML>
-<HEAD>
-<TITLE>Edit a Scenario</TITLE>
-<STYLE>
-input[type=number] {
-    width: 7ch; /* 7 characters width */
-}
-</STYLE>
-<SCRIPT>
-function init() {
-	// Stop
-	let val = document.getElementById("mainForm");
-	// alert(val);
-	val.onkeypress = function (key) {
-		let btn = 0 || key.keyCode || key.charCode;
-		if (btn == 13) {
-			// alert("Enter Key is Pressed!");
-			key.preventDefault();
-		}
-	}
-}
-</SCRIPT>
-</HEAD>
-<BODY onload=init()>
-<H2>Edit Scenario with Actions</H2>
+{% extends "layout.html" %}
+{% block title %}Edit a Scenario{% endblock %}
+{% block content %}
+<nav class="navbar navbar-expand-sm navbar-dark bg-success">
+  <div class="container-fluid">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link active" href="view">Back to List of Scenarios</a>
+      </li>
+    </ul>
+    <ul class="navbar-nav navbar-right">
+      <span class="navbar-text">User: {{ username }}&nbsp;&nbsp;</span>
+      <li class="nav-item">
+        <a class="nav-link active" href="logout">Logout</a>
+      </li>
+    </ul>
+  </div>
+</nav>
 <TABLE width=100%>
-<TR><TD>{{ form_data['msg_bar'] }}</TD>
-<TD ALIGN=RIGHT>Login as {{ form_data['username'] }}</TD></TR>
-</TABLE><BR>
+<H3><U>{{ form_data['msg_bar'] }}</U></H3>
 <TABLE WIDTH=100%>
 <TR><TD>
 <FORM ID="mainForm" METHOD="POST">
@@ -56,7 +47,7 @@ Context:<BR>
 Ethical Question:<BR>
 <TEXTAREA NAME="ethic_q" ROWS="12" COLS="100" STYLE="overflow:auto">
 {{ form_data['ethic_q'] }}</TEXTAREA><BR>
-<TABLE BORDER=1>
+<TABLE class="table table-bordered border-primary">
 	<TR><TD STYLE="text-align:center">Moral</TD>
 	<TD STYLE="text-align:center">Immoral</TD>
 	<TD STYLE="text-align:center">Amoral</TD></TR>
@@ -66,12 +57,11 @@ Ethical Question:<BR>
 </TABLE>
 <BR>
 <LABEL FOR="validated">Validation Completed</LABEL>
-<INPUT TYPE="checkbox" NAME="validated" checked/>
-<INPUT TYPE="submit" value="Save">
+<INPUT TYPE="checkbox" class="form-check-input"  NAME="validated" checked/>
+<INPUT TYPE="submit" class="btn btn-primary" value="Save">
 </FORM>
 </TD><TD VALIGN="TOP">
 {{ form_data['version'] | safe}}
 </TD></TR>
 </TABLE>
-<A HREF="view">Back to List of Scenarios</A>
-</BODY>
+{% endblock %}

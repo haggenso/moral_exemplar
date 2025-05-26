@@ -1,15 +1,13 @@
-<!DOCTYPE HTML>
-<HEAD>
-<TITLE>Moral Exemplar</TITLE>
-</HEAD>
-<BODY>
-<H2>Welcome to Moral Exemplar</H2>
-<FORM METHOD="POST">
+{% extends "layout.html" %}
+{% block title %}Moral Exemplar{% endblock %}
+{% block content %}
+<H2>Please Login</H2>
 {{ msg_bar }}<BR>
+<FORM METHOD="POST">
 <LABEL FOR="username">Username: </LABEL>
 <INPUT TYPE=TEXT NAME="username"/><BR>
 <LABEL FOR="passwd">Password: </LABEL>
 <INPUT TYPE=TEXT NAME="passwd"/><BR>
 <INPUT TYPE=SUBMIT VALUE="Login">
 </FORM>
-</BODY>
+{% endblock %}

@@ -1,16 +1,27 @@
-<!DOCTYPE HTML>
-<HEAD>
-<TITLE>List of Scenarios</TITLE>
-</HEAD>
-<BODY>
-<H2>Moral Exemplar Dataset</H2>
-<TABLE width=100%>
-<TR><TD><A HREF="edit?id=new">Add a New Record</A></TD>
-<TD ALIGN=RIGHT>Login as {{ username }}. <A HREF='logout'>Logout</A></TD></TR>
-</TABLE>
-<TABLE border=1>
+{% extends "layout.html" %}
+{% block title %}List of Scenarios{% endblock %}
+{% block content %}
+<nav class="navbar navbar-expand-sm navbar-dark bg-success">
+  <div class="container-fluid">
+    <ul class="navbar-nav">
+{% if editor == 1 %}
+      <li class="nav-item">
+        <a class="nav-link active" href="edit?id=new">Add a New Record</a>
+      </li>
+{% endif %}
+    </ul>
+    <ul class="navbar-nav navbar-right">
+      <span class="navbar-text">User: {{ username }}&nbsp;&nbsp;</span>
+      <li class="nav-item">
+        <a class="nav-link active" href="logout">Logout</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<TABLE class="table table-bordered border-primary">
 {% for html in list_of_html %}
     <TR>{{ html | safe }}</TR>
 {% endfor %}
 </TABLE>
-</BODY>
+{% endblock %}
