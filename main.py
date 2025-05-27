@@ -286,7 +286,7 @@ def edit():
 
 				# source_choices = get_choices(cursor, "sources", "source_id", "title", -1)
 
-				# return render_template('edit.html', form_data=form_data, source_choices=source_choices)
+				# return render_template('edit.html', form_data=form_data, source_choices=source_choices, username=session['username'])
 
 				# return "Update to be impelemented! scenario_id: " + form_data['scenario_id'] + " form_data:" +  repr(form_data)
 
@@ -303,7 +303,7 @@ def edit():
 				form_data['amoral_actions'] = get_action_list(cursor, scenario_id, 'amoral')
 
 				form_data['msg_bar'] = "Adding a New Record"
-				return render_template('edit.html', form_data=form_data, source_choices=source_choices)
+				return render_template('edit.html', form_data=form_data, source_choices=source_choices, username=session['username'])
 
 				# return "New record to be impelemented!"
 
@@ -363,7 +363,7 @@ def edit():
 					else:
 						form_data['msg_bar'] = "Editing a Previous Record"
 
-					return render_template('edit.html', form_data=form_data, source_choices=source_choices)
+					return render_template('edit.html', form_data=form_data, source_choices=source_choices, username=session['username'])
 
 				# return "Edit function to be implemented! id: " + repr(form_data)
 				# return "Edit function to be implemented! id: " + repr(request.args['id'])
