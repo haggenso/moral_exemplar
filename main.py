@@ -268,7 +268,19 @@ def edit():
 				mysql.connection.commit()
 
 				if scenario_id.isdigit() :
-					return redirect(url_for('edit') + "?id=" + str(form_data['scenario_id'])+"&from_edit=")
+					if form_data['next_unvalidated'] == "0":
+						return redirect(url_for('edit') + "?id=" + str(form_data['scenario_id'])+"&from_edit=")
+					else:
+						query = "SELECT scenario_id FROM scenarios "
+						query += " WHERE deleted = 0 AND validated = 0 "
+						query += " AND source_id = %s AND start_chapter >= %s AND start_verse > %s "
+						query += " ORDER BY source_id, start_chapter, start_verse limit 1 "
+						cursor.execute(query, (form_data['source_id'], form_data['start_chapter'], form_data['start_verse']))
+						q_res = cursor.fetchone()
+						if q_res is None:
+							return redirect(url_for('edit') + "?id=" + str(form_data['scenario_id'])+"&from_edit=")
+						else:
+							return redirect(url_for('edit') + "?id=" + str(q_res[0])+"&from_edit=")
 				else:
 					return redirect(url_for('edit') + "?id=" + str(form_data['scenario_id'])+"&from_new=")
 

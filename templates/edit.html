@@ -58,7 +58,11 @@ Ethical Question:<BR>
 <BR>
 <LABEL FOR="validated">Validation Completed</LABEL>
 <INPUT TYPE="checkbox" class="form-check-input"  NAME="validated" checked/>
-<INPUT TYPE="submit" class="btn btn-primary" value="Save">
+<INPUT TYPE="hidden" VALUE=0 NAME="next_unvalidated" />
+<INPUT TYPE="submit" class="btn btn-primary" value="Save"/>
+<INPUT TYPE="button" class="btn btn-primary" value="Save and Advance to next unvalidated entry"
+onclick="document.getElementsByName('next_unvalidated')[0].value=1;
+document.getElementById('mainForm').submit();"/>
 </FORM>
 </TD><TD VALIGN="TOP">
 {{ form_data['version'] | safe}}
