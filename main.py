@@ -135,10 +135,7 @@ def save_action(form_data):
 
 @app.route("/")
 def index():
-	if 'username' in session:
-		return redirect(url_for('view'))
-	else:
-	    return redirect(url_for('login'))
+	return render_template('index.html')
 
 @app.route('/login', methods=['GET','POST'])
 def login():
