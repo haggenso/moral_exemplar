@@ -19,6 +19,15 @@
   </div>
 </nav>
 
+<FORM ID="filterForm" METHOD="GET">
+<SELECT NAME="source_id">
+{% for html in source_choices %}
+    {{ html | safe }}
+{% endfor %}
+</SELECT>
+<INPUT TYPE=SUBMIT VALUE="Filter"><BR>
+</FORM>
+
 <TABLE class="table table-bordered border-primary">
 {% for html in list_of_html %}
     <TR>{{ html | safe }}</TR>

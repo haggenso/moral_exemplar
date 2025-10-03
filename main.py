@@ -58,7 +58,7 @@ def get_choices(cursor, tbl_name, pri_key, field, select_value):
 
 	choice_list = []
 	for item in choices :
-		if item[0] == select_value :
+		if str(item[0]) == str(select_value) :
 			selected = " SELECTED"
 		else:
 			selected = ""
@@ -180,12 +180,24 @@ def view():
 			# out_str += app.config['MYSQL_DB']
 			cursor = mysql.connection.cursor()
 
+			# form_data = dict(request.args)
+
+			if 'source_id' in request.args:
+				if request.args['source_id'].isdigit():
+					source_id = request.args['source_id']
+				else:
+					source_id = "1"
+			else:
+				source_id = "1"
+			source_choices = get_choices(cursor, "sources", "source_id", "title", source_id)
+
 			id_key = 'scenario_id'
 			fld_list = ['scenario_key','description','context','validated']
 			query = "SELECT " + id_key + "," + ",".join(fld_list) + " FROM scenarios "
-			query += " WHERE deleted=0 and " + session['groupfilter']
+			query += " WHERE deleted=0 AND " + session['groupfilter']
+			query += " AND source_id = %s "
 			query += " ORDER BY source_id, start_chapter, start_verse"
-			cursor.execute(query)
+			cursor.execute(query, (source_id, ))
 
 			# Fetch all rows
 			scenarios = cursor.fetchall()
@@ -207,7 +219,7 @@ def view():
 				item.insert(0, "<A HREF='" + url_for('edit') + "?id=" + str(scenario_id) + "'>Edit</A>")
 				list_of_html.append(list_in_TD(item))
 
-			return render_template('view.html', list_of_html=list_of_html, username=session['username'], editor=session['editor'])
+			return render_template('view.html', source_choices=source_choices, list_of_html=list_of_html, username=session['username'], editor=session['editor'])
 			# return out_str + "<p>" + repr(scenarios) + "</p>\n"
 			# return out_str + "<p>" + repr(list_of_html) + "</p>\n"
 
