@@ -22,14 +22,11 @@
 <TR><TD>
 <FORM ID="mainForm" METHOD="POST">
 <INPUT TYPE="hidden" NAME="scenario_id" VALUE="{{ form_data['scenario_id'] }}"/>
+<INPUT TYPE="hidden" NAME="source_id" VALUE="{{ form_data['source_id'] }}"/>
 <LABEL FOR="scenario_key">scenario_key: </LABEL>
 <INPUT TYPE="text" NAME="scenario_key" READONLY SIZE=30 VALUE="{{ form_data['scenario_key'] }}"/><BR>
-<LABEL FOR="source_id">Scenario source: </LABEL>
-<SELECT NAME="source_id">
-{% for html in source_choices %}
-    {{ html | safe }}
-{% endfor %}
-</SELECT><BR>
+<LABEL FOR="source_name">Scenario source: </LABEL>
+<INPUT TYPE="text" NAME="source_name" READONLY SIZE=30 VALUE="{{ form_data['source_name'] }}"/><BR>
 <LABEL FOR="start_chapter">Start Chapter: </LABEL>
 <INPUT TYPE="number" NAME="start_chapter" VALUE="{{ form_data['start_chapter'] }}"/>&nbsp;&nbsp;
 <LABEL FOR="start_verse">Start Verse: </LABEL>

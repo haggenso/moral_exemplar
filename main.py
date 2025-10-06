@@ -249,11 +249,15 @@ def edit():
 					query = "UPDATE actions SET deleted=1 WHERE scenario_id = %s"
 					cursor.execute(query, (scenario_id,))
 
+				# The following code actually works well, but
+				# scenario_key is created from import data, should not be change
+				"""
 				source_key = get_source_key(cursor, form_data['source_id'])
 				scenario_key = source_key + 'C' + str(form_data['start_chapter']) + 'V' + str(form_data['start_verse'])
 				if not((form_data['start_chapter']==form_data['end_chapter']) and (form_data['start_verse']==form_data['end_verse'])) :
 					scenario_key += '-C' + str(form_data['end_chapter']) + 'V' + str(form_data['end_verse'])
 				form_data['scenario_key'] = scenario_key
+				"""
 
 				if form_data.get('validated', '') == '':
 					form_data['validated']=0
@@ -359,7 +363,11 @@ def edit():
 							version_html += '</FORM>\n'
 						form_data['version'] = version_html
 
-					source_choices = get_choices(cursor, "sources", "source_id", "title", form_data['source_id'])
+					# source_choices = get_choices(cursor, "sources", "source_id", "title", form_data['source_id'])
+					query = "SELECT title FROM sources WHERE source_id = %s"
+					cursor.execute(query, (form_data['source_id'],))
+					q_res = cursor.fetchone()
+					form_data['source_name'] = q_res[0]
 
 					form_data['moral_actions'] = get_action_list(cursor, scenario_id, 'moral')
 					form_data['immoral_actions'] = get_action_list(cursor, scenario_id, 'immoral')
@@ -372,7 +380,8 @@ def edit():
 					else:
 						form_data['msg_bar'] = "Editing a Previous Record"
 
-					return render_template('edit.html', form_data=form_data, source_choices=source_choices, username=session['username'])
+					return render_template('edit.html', form_data=form_data, username=session['username'])
+				#	return render_template('edit.html', form_data=form_data, source_choices=source_choices, username=session['username'])
 
 				# return "Edit function to be implemented! id: " + repr(form_data)
 				# return "Edit function to be implemented! id: " + repr(request.args['id'])
