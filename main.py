@@ -203,8 +203,7 @@ def view():
 			scenarios = cursor.fetchall()
 
 			list_of_html = []
-			header = fld_list
-			header.insert(0, "Edit")
+			header = ['Edit', 'Scenario Key','Desc.','Text','Validated']
 			header = list_html_esc(header)
 			for i in range(len(header)) :
 				header[i] = "<B>" + header[i] +"</B>"
