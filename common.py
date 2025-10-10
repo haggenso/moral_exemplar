@@ -93,23 +93,3 @@ def get_action_list(cursor, scenario_id, moral_status):
 			action_html += like6lvl[idx] +'<BR>\n'
 
 	return action_html
-
-# Use the cursor variable globally so that the db session commit action can be done after this function returns
-def save_action(form_data):
-	global cursor
-
-	for ele_key in form_data.keys():
-		matches = re.match(r"lst_(\D+)(\d+)_desc", ele_key)
-		# Match lst_(moral_status)(count)_desc
-		if matches :
-			action_desc = form_data[ele_key].strip()
-			action_confidence_name = 'lst_' + matches.group(1) + matches.group(2) + '_confidence'
-			# action_id_name = 'lst_' + matches.group(1) + matches.group(2) + '_id'
-			# print(action_id_name)
-
-			# Some Content in Description
-			if len(action_desc) > 0 :
-				query = "INSERT INTO actions (timestamp, scenario_id, "
-				query += " action_description, moral_status, confidence) "
-				query += " VALUES (NOW(), %s, %s, %s, %s)"
-				cursor.execute(query, (form_data['scenario_id'], action_desc, matches.group(1), form_data[action_confidence_name]))
