@@ -1,5 +1,6 @@
 import common
 
+import re
 from flask import render_template, url_for, request, session, redirect
 # from flask import Flask, render_template, url_for, request, session, redirect, jsonify
 
@@ -66,3 +67,77 @@ def load(mysql, scenario_id):
 
 		return render_template('edit.html', form_data=form_data, username=session['username'])
 
+def save(mysql, scenario_id):
+
+	form_data = dict(request.form)
+	cursor = mysql.connection.cursor()
+
+	if scenario_id.isdigit() :
+		# First, delete old records
+		query = "UPDATE scenarios SET deleted=1 WHERE scenario_id = %s"
+		cursor.execute(query, (scenario_id,))
+		query = "UPDATE actions SET deleted=1 WHERE scenario_id = %s"
+		cursor.execute(query, (scenario_id,))
+
+		# The following code actually works well, but
+		# scenario_key is created from import data, should not be change
+		"""
+		source_key = get_source_key(cursor, form_data['source_id'])
+		scenario_key = source_key + 'C' + str(form_data['start_chapter']) + 'V' + str(form_data['start_verse'])
+		if not((form_data['start_chapter']==form_data['end_chapter']) and (form_data['start_verse']==form_data['end_verse'])) :
+			scenario_key += '-C' + str(form_data['end_chapter']) + 'V' + str(form_data['end_verse'])
+		form_data['scenario_key'] = scenario_key
+		"""
+
+		if form_data.get('validated', '') == '':
+			form_data['validated']=0
+		else:
+			form_data['validated']=1
+
+		# Second, Build a new record in TABLE scenarios
+		query = "INSERT INTO scenarios (date_recorded, scenario_key, source_id, "
+		query += " start_chapter, start_verse, end_chapter, end_verse, "
+		query += " description, context, ethic_q, username, validated) "
+		query += " VALUES (NOW(), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+		cursor.execute(query, (form_data['scenario_key'], form_data['source_id'], \
+		form_data['start_chapter'], form_data['start_verse'], form_data['end_chapter'], form_data['end_verse'], \
+		form_data['description'], form_data['context'], form_data['ethic_q'], session['username'], form_data['validated']))
+
+		cursor.execute("SELECT LAST_INSERT_ID()")
+		record = cursor.fetchone()
+		form_data['scenario_id'] = record[0]
+
+		# Third, insert all moral/immoral/amoral records into TABLE actions
+		for ele_key in form_data.keys():
+			matches = re.match(r"lst_(\D+)(\d+)_desc", ele_key)
+			# Match lst_(moral_status)(count)_desc
+			if matches :
+				action_desc = form_data[ele_key].strip()
+				action_confidence_name = 'lst_' + matches.group(1) + matches.group(2) + '_confidence'
+				# action_id_name = 'lst_' + matches.group(1) + matches.group(2) + '_id'
+				# print(action_id_name)
+
+				# Some Content in Description
+				if len(action_desc) > 0 :
+					query = "INSERT INTO actions (timestamp, scenario_id, "
+					query += " action_description, moral_status, confidence) "
+					query += " VALUES (NOW(), %s, %s, %s, %s)"
+					cursor.execute(query, (form_data['scenario_id'], action_desc, matches.group(1), form_data[action_confidence_name]))
+
+		mysql.connection.commit()
+
+		if form_data['next_unvalidated'] == "0":
+			return redirect(url_for('edit') + "?id=" + str(form_data['scenario_id'])+"&from_edit=")
+		else:
+			query = "SELECT scenario_id FROM scenarios "
+			query += " WHERE deleted = 0 AND validated = 0 "
+			query += " AND source_id = %s AND start_chapter >= %s AND start_verse > %s "
+			query += " ORDER BY source_id, start_chapter, start_verse limit 1 "
+			cursor.execute(query, (form_data['source_id'], form_data['start_chapter'], form_data['start_verse']))
+			q_res = cursor.fetchone()
+			if q_res is None:
+				return redirect(url_for('edit') + "?id=" + str(form_data['scenario_id'])+"&from_edit=")
+			else:
+				return redirect(url_for('edit') + "?id=" + str(q_res[0])+"&from_edit=")
+	else:
+		return "<p>Wrong scenario_id !</p>\n"
