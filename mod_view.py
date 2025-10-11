@@ -9,11 +9,14 @@ def view(mysql):
 
 	if 'source_id' in request.args:
 		if request.args['source_id'].isdigit():
-			source_id = request.args['source_id']
+			session['source_id'] = request.args['source_id']
 		else:
 			source_id = "1"
 	else:
 		source_id = "1"
+	if 'source_id' in session:
+		source_id = session['source_id']
+
 	source_choices = common.get_choices(cursor, "sources", "source_id", "title", source_id)
 
 	id_key = 'scenario_id'
