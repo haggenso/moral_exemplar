@@ -1,12 +1,15 @@
 import mod_login
 import mod_view
 import mod_edit
+import mod_api
 
 from decouple import config
 from flask import Flask, render_template, url_for, request, session, redirect, jsonify
+from flask_cors import CORS
 from flask_mysqldb import MySQL
 
 app = Flask(__name__)
+CORS(app)
 # Set the secret key to some random bytes. Keep this really secret!
 app.secret_key = config('session_key')
 
@@ -64,6 +67,17 @@ def edit():
 			return (jsonify({'status': 'error', 'message': str(e)}))
 	else:
 		return redirect(url_for('login'))
+
+@app.route('/api/<path:api_type>', methods=['POST'])
+def api(api_type):
+	if 'username' in session:
+		try:
+			return mod_api.api(mysql, api_type)
+			# return out_str + "<p>" + repr(list_of_html) + "</p>\n"
+		except Exception as e:
+			return (jsonify({'status': 'error', 'message': str(e)}))
+	else:
+		return jsonify({"error": "error"}), 404
 
 if __name__ == '__main__':
 	app.run()
