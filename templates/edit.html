@@ -28,13 +28,13 @@
 <LABEL FOR="source_name">Scenario source: </LABEL>
 <INPUT TYPE="text" NAME="source_name" READONLY SIZE=30 VALUE="{{ form_data['source_name'] }}"/><BR>
 <LABEL FOR="start_chapter">Start Chapter: </LABEL>
-<INPUT TYPE="number" NAME="start_chapter" VALUE="{{ form_data['start_chapter'] }}"/>&nbsp;&nbsp;
+<INPUT TYPE="number" NAME="start_chapter" VALUE="{{ form_data['start_chapter'] }}" READONLY/>&nbsp;&nbsp;
 <LABEL FOR="start_verse">Start Verse: </LABEL>
-<INPUT TYPE="number" NAME="start_verse" VALUE="{{ form_data['start_verse'] }}"/><BR>
+<INPUT TYPE="number" NAME="start_verse" VALUE="{{ form_data['start_verse'] }}" READONLY/><BR>
 <LABEL FOR="end_chapter">End Chapter: </LABEL>
-<INPUT TYPE="number" NAME="end_chapter" VALUE="{{ form_data['end_chapter'] }}"/>&nbsp;&nbsp;
+<INPUT TYPE="number" NAME="end_chapter" VALUE="{{ form_data['end_chapter'] }}" READONLY/>&nbsp;&nbsp;
 <LABEL FOR="end_verse">End Verse: </LABEL>
-<INPUT TYPE="number" NAME="end_verse" VALUE="{{ form_data['end_verse'] }}"/><BR>
+<INPUT TYPE="number" NAME="end_verse" VALUE="{{ form_data['end_verse'] }}" READONLY/><BR>
 Description:<BR>
 <TEXTAREA NAME="description" ROWS="4" COLS="100" STYLE="overflow:auto">
 {{ form_data['description'] }}</TEXTAREA><BR>
