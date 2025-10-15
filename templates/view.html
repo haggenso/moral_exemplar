@@ -1,23 +1,7 @@
 {% extends "layout.html" %}
 {% block title %}List of Scenarios{% endblock %}
 {% block content %}
-<nav class="navbar navbar-expand-sm navbar-dark bg-success">
-  <div class="container-fluid">
-    <ul class="navbar-nav">
-{% if editor == 1 %}
-      <li class="nav-item">
-        <a class="nav-link active" href="edit?id=new">Admin Dashboard</a>
-      </li>
-{% endif %}
-    </ul>
-    <ul class="navbar-nav navbar-right">
-      <span class="navbar-text">User: {{ username }}&nbsp;&nbsp;</span>
-      <li class="nav-item">
-        <a class="nav-link active" href="logout">Logout</a>
-      </li>
-    </ul>
-  </div>
-</nav>
+{{ topbar | safe }}
 
 <FORM ID="filterForm" METHOD="GET">
 <SELECT NAME="source_id">

@@ -1,4 +1,5 @@
 import common
+import topbar
 
 import re
 from flask import render_template, url_for, request, session, redirect
@@ -65,7 +66,7 @@ def load(mysql, scenario_id):
 		else:
 			form_data['msg_bar'] = "Editing a Previous Record"
 
-		return render_template('edit.html', form_data=form_data, username=session['username'])
+		return render_template('edit.html', form_data=form_data, topbar = topbar.topbar("edit"))
 
 def save(mysql, scenario_id):
 

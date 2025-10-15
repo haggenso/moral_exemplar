@@ -1,4 +1,3 @@
-import re
 import html
 
 action_count = 5

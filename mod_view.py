@@ -1,4 +1,5 @@
 import common
+import topbar
 
 from flask import request, render_template, url_for, session
 
@@ -46,4 +47,4 @@ def view(mysql):
 		item.insert(0, "<A HREF='" + url_for('edit') + "?id=" + str(scenario_id) + "'>Edit</A>")
 		list_of_html.append(common.list_in_TD(item))
 
-	return render_template('view.html', source_choices=source_choices, list_of_html=list_of_html, username=session['username'], editor=session['editor'])
+	return render_template('view.html', source_choices=source_choices, list_of_html=list_of_html, topbar=topbar.topbar("view"))

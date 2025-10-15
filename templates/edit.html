@@ -1,21 +1,8 @@
 {% extends "layout.html" %}
 {% block title %}Edit a Scenario{% endblock %}
 {% block content %}
-<nav class="navbar navbar-expand-sm navbar-dark bg-success">
-  <div class="container-fluid">
-    <ul class="navbar-nav">
-      <li class="nav-item">
-        <a class="nav-link active" href="view">Back to List of Scenarios</a>
-      </li>
-    </ul>
-    <ul class="navbar-nav navbar-right">
-      <span class="navbar-text">User: {{ username }}&nbsp;&nbsp;</span>
-      <li class="nav-item">
-        <a class="nav-link active" href="logout">Logout</a>
-      </li>
-    </ul>
-  </div>
-</nav>
+{{ topbar | safe }}
+
 <TABLE width=100%>
 <H3><U>{{ form_data['msg_bar'] }}</U></H3>
 <TABLE WIDTH=100%>
