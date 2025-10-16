@@ -82,7 +82,16 @@ def api(api_type):
 
 @app.route("/admin")
 def admin():
-    return render_template('admin.html', topbar = topbar.topbar("edit"))
+	if session['editor'] == 1:
+		return render_template('admin.html', topbar = topbar.topbar("edit"))
+	else:
+		# Redirect back to the referring page
+		referrer_url = request.referrer
+		if referrer_url:
+			return redirect(referrer_url)
+		else:
+			# Fallback if referrer is not available (e.g., direct access)
+			return redirect(url_for('index'))
 
 if __name__ == '__main__':
 	app.run()
