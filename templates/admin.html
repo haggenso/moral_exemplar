@@ -1,0 +1,138 @@
+{% extends "layout.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block js_include %}
+<link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<SCRIPT>
+// console.log("Running!");
+base_url = "https://moralstage.pythonanywhere.com/api/"
+/*
+const testData = {
+    "x": [1, 2, 3],
+    "y": [1, 5 ,2]
+}
+*/
+
+async function API(api_type, jsonParam){
+
+    try {
+        const options = {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json', // Indicate that the body contains JSON
+                'Accept': 'application/json' // Indicate that we expect JSON in return
+            }
+        };
+
+        try {
+            // Validate JSON
+            JSON.parse(jsonParam);
+            options.body = jsonParam;
+        } catch (e) {
+            throw new Error('Invalid JSON format: ' + e.message);
+        }
+
+        url = base_url + api_type
+        const response = await fetch(url, options);
+
+        if (!response.ok) {
+            const errorMessage = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorMessage}`);
+        }
+
+        const responseData = await response.json(); // Parse the JSON response
+        return responseData;
+
+    } catch (error) {
+        console.error('Error during fetch operation:', error);
+        throw error; // Re-throw the error for further handling if needed
+    }
+}
+</SCRIPT>
+{% endblock %}
+{% block content %}
+{{ topbar | safe }}
+<H3>Record Updated by Date</H3>
+<div>
+  <canvas id="dailyUpdateChart" width=1000 height=500></canvas>
+</div>
+<SCRIPT>
+const ctx = document.getElementById('dailyUpdateChart');
+
+var dailyUpdateChart = new Chart(ctx, {
+    type: 'line',
+    options: {
+        responsive: false,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text:"Date"
+                }
+            },
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text:"Update Records"
+                }
+            }
+        }
+    }
+});
+
+const dailyUpdateParam = {
+    "days": 30
+}
+dailyUpdateChartData = API('daily_update',JSON.stringify(dailyUpdateParam)).then((dailyUpdateChartData) => {
+    console.log(dailyUpdateChartData);
+    dailyUpdateChart.data = {
+        labels: dailyUpdateChartData.x,
+        datasets: [{
+            data: dailyUpdateChartData.y,
+            borderWidth: 1
+        }]
+    };
+    dailyUpdateChart.update();
+} );
+</SCRIPT>
+<H3>Completion for Each Source</H3>
+<div id="completeTable"></div>
+<SCRIPT>
+var table = new Tabulator("#completeTable", {
+    ajaxURL:base_url + "source_update",
+    ajaxConfig:"POST",
+    layout:"fitDataTable",
+    height:"150px",
+    columns:[
+    {title:"Source Title", field:"title"},
+    {title:"Validated Records", field:"validate", hozAlign:"right", sorter:"number"},
+    {title:"Total Records", field:"total", hozAlign:"right", sorter:"number"},
+    {title:"Completed%", field:"complete", hozAlign:"right", sorter:"number"},
+    {title:"Completed", field:"complete", formatter:"progress"},
+    ],
+});
+</SCRIPT>
+<H3>User Summary</H3>
+<div id="userTable"></div>
+<SCRIPT>
+var table = new Tabulator("#userTable", {
+    ajaxURL:base_url + "user_summary",
+    ajaxConfig:"POST",
+    layout:"fitDataTable",
+    height:"300px",
+    columns:[
+    {title:"User Name", field:"username"},
+    {title:"Last Update Record Date", field:"last_update", hozAlign:"right"},
+    {title:"No. of Validated Records", field:"validate", hozAlign:"right", sorter:"number"},
+    ],
+});
+</SCRIPT>
+{% endblock %}

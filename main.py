@@ -2,6 +2,7 @@ import mod_login
 import mod_view
 import mod_edit
 import mod_api
+import topbar
 
 from decouple import config
 from flask import Flask, render_template, url_for, request, session, redirect, jsonify
@@ -78,6 +79,10 @@ def api(api_type):
 			return (jsonify({'status': 'error', 'message': str(e)}))
 	else:
 		return jsonify({"error": "error"}), 404
+
+@app.route("/admin")
+def admin():
+    return render_template('admin.html', topbar = topbar.topbar("edit"))
 
 if __name__ == '__main__':
 	app.run()

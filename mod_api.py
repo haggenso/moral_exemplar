@@ -7,7 +7,9 @@ def api(mysql, api_type):
 	elif api_type == 'daily_update':
 		return daily_update(mysql)
 	elif api_type == 'source_update':
-		return 	source_update(mysql)
+		return source_update(mysql)
+	elif api_type == 'user_summary':
+	    return user_summary(mysql)
 	else:
 		return jsonify({"error": "api_type error"}), 404
 
@@ -30,6 +32,7 @@ def daily_update(mysql):
 
 	query = "SELECT date(date_recorded), count(scenario_id) FROM scenarios "
 	query += "WHERE date_recorded > DATE_SUB(NOW(), INTERVAL %s DAY) "
+	query += "AND username <> 'initial'	"
 	query += "GROUP BY date(date_recorded)"
 	cursor.execute(query, (param['days'],))
 
@@ -71,8 +74,34 @@ def source_update(mysql):
 		tbl.append(rec)
 	return jsonify(tbl), 201
 
-"""
-select count(scenario_id) from scenarios s
-where s.date_recorded < CONVERT('2025-10-10', DATE)
-and s.validated = 1
-"""
+def user_summary(mysql):
+    cursor = mysql.connection.cursor()
+
+    tbl = []
+
+    query = "SELECT base_user.username, last_update.last_update_datetime, validate.validated_count FROM "
+    query += "(SELECT user_id, username from users) AS  base_user LEFT JOIN "
+    query += "(SELECT username, max(date_recorded) AS last_update_datetime FROM scenarios "
+    query += "WHERE username <> 'initial' GROUP BY username) AS last_update "
+    query += "ON base_user.username = last_update.username LEFT JOIN "
+    query += "(SELECT username, count(scenario_id) AS validated_count FROM scenarios "
+    query += "WHERE username <> 'initial' AND validated =1 "
+    query += "GROUP BY username) AS validate "
+    query += "ON base_user.username = validate.username "
+    query += "ORDER BY base_user.user_id "
+    cursor.execute(query)
+
+    q_res = cursor.fetchall()
+    for item in q_res:
+    	rec = {}
+    	rec['username'] = item[0]
+    	if item[1]:
+    		rec['last_update'] = item[1].strftime("%Y-%m-%d %H:%M:%S")
+    	else:
+    		rec['last_update'] = "1900-01-01 00:00:00"
+    	if item[2]:
+    		rec['validate'] = item[2]
+    	else:
+    		rec['validate'] = 0
+    	tbl.append(rec)
+    return jsonify(tbl), 201
