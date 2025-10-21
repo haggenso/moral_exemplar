@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from flask import jsonify, request
+from flask import jsonify, request, session
 
 def api(mysql, api_type):
 	if api_type == 'test':
@@ -10,6 +10,8 @@ def api(mysql, api_type):
 		return source_update(mysql)
 	elif api_type == 'user_summary':
 	    return user_summary(mysql)
+	elif api_type == 'user_activity':
+	    return user_activity(mysql)
 	else:
 		return jsonify({"error": "api_type error"}), 404
 
@@ -105,3 +107,29 @@ def user_summary(mysql):
     		rec['validate'] = 0
     	tbl.append(rec)
     return jsonify(tbl), 201
+
+def user_activity(mysql):
+	param = request.get_json()
+	cursor = mysql.connection.cursor()
+
+	xy = {}
+
+	# Calculate the date some days ago
+	date_count = date.today() - timedelta(days=param['days'])
+
+	for _ in range(param['days']):
+		xy[date_count.strftime('%Y-%m-%d')] = 0
+		date_count += timedelta(days=1)
+
+	query = "SELECT date(date_recorded), count(scenario_id) FROM scenarios "
+	query += "WHERE date_recorded > DATE_SUB(NOW(), INTERVAL %s DAY) "
+	query += "AND username = %s "
+	query += "GROUP BY date(date_recorded)"
+	cursor.execute(query, (param['days'], session['username']))
+
+	q_res = cursor.fetchall()
+	for item in q_res:
+		tmp = item[0].strftime('%Y-%m-%d')
+		xy[tmp] = item[1]
+	data = {"x": list(xy.keys()), "y": list(xy.values())}
+	return jsonify(data), 201

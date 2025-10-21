@@ -93,5 +93,12 @@ def admin():
 			# Fallback if referrer is not available (e.g., direct access)
 			return redirect(url_for('index'))
 
+@app.route("/profile")
+def profile():
+	if 'username' in session:
+		return render_template('profile.html', topbar = topbar.topbar("profile"), username = session["username"])
+	else:
+		return redirect(url_for('login'))
+
 if __name__ == '__main__':
 	app.run()
