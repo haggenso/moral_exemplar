@@ -1,6 +1,32 @@
 from datetime import date, timedelta
 from flask import jsonify, request, session
 
+def get_left_n_chars_until_space(text, n):
+	"""
+	Code originally generated from Google search, debugging needed :(
+
+	Extracts the left 'n' characters of a string, stopping at the first space encountered.
+
+	Args:
+		text (str): The input string.
+		n (int): The maximum number of characters to extract from the left.
+
+	Returns:
+		str: The extracted substring.
+	"""
+	# Slice the string to get the first 'n' characters
+	segment = text[:n]
+
+	# Find the index of the first space in the segment
+	space_index = segment.rfind(' ')
+
+	# If a space is found, return the substring up to that space
+	if space_index != -1:
+		return segment[:space_index]
+	# If no space is found within the first 'n' characters, return the entire segment
+	else:
+		return segment
+
 def api(mysql, api_type):
 	if api_type == 'test':
 		return test()
@@ -12,6 +38,8 @@ def api(mysql, api_type):
 	    return user_summary(mysql)
 	elif api_type == 'user_activity':
 	    return user_activity(mysql)
+	elif api_type == 'user_last_upd':
+	    return user_last_upd(mysql)
 	else:
 		return jsonify({"error": "api_type error"}), 404
 
@@ -133,3 +161,26 @@ def user_activity(mysql):
 		xy[tmp] = item[1]
 	data = {"x": list(xy.keys()), "y": list(xy.values())}
 	return jsonify(data), 201
+
+def user_last_upd(mysql):
+    context_maxlen = 50
+    cursor = mysql.connection.cursor()
+
+    tbl = []
+
+    query = "SELECT scenario_key, context, date_recorded FROM scenarios "
+    query += "WHERE username = %s "
+    query += "AND deleted = 0 ORDER BY date_recorded desc limit 10 "
+    cursor.execute(query, (session['username'],))
+
+    q_res = cursor.fetchall()
+    for item in q_res:
+    	rec = {}
+    	rec['scenario_key'] = item[0]
+    	if len(item[1]) > context_maxlen :
+    		rec['context'] = get_left_n_chars_until_space(item[1], context_maxlen) + '...'
+    	else:
+    		rec['context'] = item[1]
+    	rec['last_update'] = item[2].strftime("%Y-%m-%d %H:%M:%S")
+    	tbl.append(rec)
+    return jsonify(tbl), 201
