@@ -89,7 +89,7 @@ var dailyUpdateChart = new Chart(ctx, {
 });
 
 const dailyUpdateParam = {
-    "days": 30
+    "days": 90
 }
 dailyUpdateChartData = API('daily_update',JSON.stringify(dailyUpdateParam)).then((dailyUpdateChartData) => {
     console.log(dailyUpdateChartData);
