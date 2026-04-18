@@ -60,11 +60,11 @@ async function API(api_type, jsonParam){
 <p>Please join discord channel for discussion and support at <A HREF="https://discord.gg/qk6Xs7GhAv">https://discord.gg/qk6Xs7GhAv</A></p>
 <BR/>
 <TABLE><TR><TD VALIGN=TOP>
-<H3>Records Updated by You Recently</H3>
+<H3>Paragraphs Updated by You Recently</H3>
 <div id="userTable"></div>
 </TD><TD>&nbsp;&nbsp;&nbsp;&nbsp;
 </TD><TD VALIGN=TOP>
-<H3>No. of Records Updated by You Recently</H3>
+<H3>No. of Paragraphs Updated by You Recently</H3>
 <div>
   <canvas id="dailyUpdateChart" width=500 height=300></canvas>
 </div>
@@ -79,7 +79,7 @@ var table = new Tabulator("#userTable", {
     columns:[
     {title:"Scenario Key", field:"scenario_key"},
     {title:"Text", field:"context"},
-    {title:"Last Update Record Date", field:"last_update", hozAlign:"right"},
+    {title:"Last Update Paragraph Date", field:"last_update", hozAlign:"right"},
     ],
 });
 
@@ -106,7 +106,7 @@ var dailyUpdateChart = new Chart(ctx, {
                 beginAtZero: true,
                 title: {
                     display: true,
-                    text:"Update Records"
+                    text:"Update Paragraphs"
                 }
             }
         }

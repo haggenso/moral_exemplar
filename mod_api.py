@@ -89,8 +89,23 @@ def source_update(mysql):
 	query += "GROUP BY sc.source_id) AS valid_table ON "
 	query += "tot_table.sid = valid_table.sid ORDER BY tot_table.sid"
 	cursor.execute(query)
-
 	q_res = cursor.fetchall()
+
+	# Not to make the above query too long, I will manually join the third table
+	query = "select so_base.sid, act_tot as action_tot from"
+	query += "(select source_id as sid from sources) as so_base "
+	query += "left join (select so.source_id as sid, count(action_id) as act_tot "
+	query += "from sources so left join scenarios sc "
+	query += "ON so.source_id = sc.source_id "
+	query += "inner join actions a on sc.scenario_id = a.scenario_id "
+	query += "where sc.deleted = 0 and a.deleted = 0 and sc.validated = 1  "
+	query += "group by so.source_id) as grp_tbl "
+	query += "on so_base.sid = grp_tbl.sid "
+	query += "order by so_base.sid"
+	cursor.execute(query)
+	q_actions = cursor.fetchall()
+
+	idx = 0
 	for item in q_res:
 		rec = {}
 		rec['sid'] = item[0]
@@ -101,7 +116,13 @@ def source_update(mysql):
 			rec['validate'] = 0
 		rec['total'] = item[3]
 		rec['complete'] = round(float(rec['validate']) / float(item[3]) * 100, 2)
+		if q_actions[idx][1]:
+			rec['action_tot'] = q_actions[idx][1]
+		else:
+			rec['action_tot'] = 0
 		tbl.append(rec)
+		idx += 1
+
 	return jsonify(tbl), 201
 
 def user_summary(mysql):
@@ -120,8 +141,8 @@ def user_summary(mysql):
     query += "ON base_user.username = validate.username "
     query += "ORDER BY base_user.user_id "
     cursor.execute(query)
-
     q_res = cursor.fetchall()
+
     for item in q_res:
     	rec = {}
     	rec['username'] = item[0]

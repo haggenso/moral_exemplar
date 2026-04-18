@@ -53,7 +53,7 @@ async function API(api_type, jsonParam){
 {% endblock %}
 {% block content %}
 {{ topbar | safe }}
-<H3>Record Updated by Date</H3>
+<H3>Paragraphs Updated by Date</H3>
 <div>
   <canvas id="dailyUpdateChart" width=1000 height=500></canvas>
 </div>
@@ -81,7 +81,7 @@ var dailyUpdateChart = new Chart(ctx, {
                 beginAtZero: true,
                 title: {
                     display: true,
-                    text:"Update Records"
+                    text:"Update Paragraphs"
                 }
             }
         }
@@ -113,8 +113,9 @@ var table = new Tabulator("#completeTable", {
     height:"150px",
     columns:[
     {title:"Source Title", field:"title"},
-    {title:"Validated Records", field:"validate", hozAlign:"right", sorter:"number"},
-    {title:"Total Records", field:"total", hozAlign:"right", sorter:"number"},
+    {title:"Validated Actions", field:"action_tot", hozAlign:"right", sorter:"number"},
+    {title:"Validated Paragraphs", field:"validate", hozAlign:"right", sorter:"number"},
+    {title:"Total Paragraphs", field:"total", hozAlign:"right", sorter:"number"},
     {title:"Completed%", field:"complete", hozAlign:"right", sorter:"number"},
     {title:"Completed", field:"complete", formatter:"progress"},
     ],
@@ -130,8 +131,8 @@ var table = new Tabulator("#userTable", {
     height:"300px",
     columns:[
     {title:"User Name", field:"username"},
-    {title:"Last Update Record Date", field:"last_update", hozAlign:"right"},
-    {title:"No. of Validated Records", field:"validate", hozAlign:"right", sorter:"number"},
+    {title:"Last Update Paragraph Date", field:"last_update", hozAlign:"right"},
+    {title:"No. of Validated Paragraphs", field:"validate", hozAlign:"right", sorter:"number"},
     ],
 });
 </SCRIPT>
